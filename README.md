@@ -261,14 +261,6 @@ node app.js
 - CORS configurado
 - SQL Injection protegido con prepared statements
 
-## 📞 Soporte
-
-Para dudas o problemas, contactar a: admin@keywarden.com
-
-## 📄 Licencia
-
-ISC
-
 ---
 
 **Desarrollado para la gestión eficiente de proveedores de TI** 🚀
