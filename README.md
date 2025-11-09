@@ -3,7 +3,6 @@
 Sistema de gestión de proveedores de equipamiento informático con control de incidencias, servicios técnicos, facturación y reportes ejecutivos.
 
 ## 📋 Requerimientos del Sistema
-
 - **R1:** Gestión de proveedores de equipamiento informático
 - **R2:** Registro de equipos con fechas de adquisición y garantía
 - **R3:** Calificación de proveedores según nivel de cumplimiento
@@ -260,14 +259,6 @@ node app.js
 - Validación de roles en cada endpoint
 - CORS configurado
 - SQL Injection protegido con prepared statements
-
-## 📞 Soporte
-
-Para dudas o problemas, contactar a: admin@keywarden.com
-
-## 📄 Licencia
-
-ISC
 
 ---
 
