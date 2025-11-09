@@ -45,7 +45,7 @@ const getIncidentesPorProveedor = async (proveedorId) => {
        p.modelo,
        u.nombre as reportado_por,
        t.nombre as tecnico_nombre,
-       t.apellido as tecnico_apellido,
+       t.documento as tecnico_documento,
        st.fecha_inicio,
        st.fecha_final,
        TIMESTAMPDIFF(SECOND, i.fecha_apertura, st.fecha_inicio) as tiempo_respuesta_seg,
@@ -56,7 +56,7 @@ const getIncidentesPorProveedor = async (proveedorId) => {
      JOIN producto p ON i.producto_id_producto = p.id_producto
      JOIN usuario u ON i.usuario_id_usuario = u.id_usuario
      LEFT JOIN servicio_tecnico st ON i.idincidente = st.incidente_idincidente
-     LEFT JOIN tecnico t ON st.tecnico_idtecnico = t.idtecnico
+     LEFT JOIN tecnico t ON st.tecnico_idtecnico = t.id_tecnico
      LEFT JOIN calificacion_proveedor c ON i.idincidente = c.incidente_idincidente
      WHERE p.proveedor_id_proveedor = ?
      ORDER BY i.fecha_apertura DESC`,
@@ -77,7 +77,7 @@ const getIncidentesPorProducto = async (productoId) => {
        i.estado,
        u.nombre as reportado_por,
        t.nombre as tecnico_nombre,
-       t.apellido as tecnico_apellido,
+       t.documento as tecnico_documento,
        st.fecha_inicio,
        st.fecha_final,
        st.descripcion as solucion,
@@ -86,7 +86,7 @@ const getIncidentesPorProducto = async (productoId) => {
      FROM incidente i
      JOIN usuario u ON i.usuario_id_usuario = u.id_usuario
      LEFT JOIN servicio_tecnico st ON i.idincidente = st.incidente_idincidente
-     LEFT JOIN tecnico t ON st.tecnico_idtecnico = t.idtecnico
+     LEFT JOIN tecnico t ON st.tecnico_idtecnico = t.id_tecnico
      WHERE i.producto_id_producto = ?
      ORDER BY i.fecha_apertura DESC`,
     [productoId]
@@ -100,9 +100,9 @@ const getIncidentesPorProducto = async (productoId) => {
 const getDesempenoTecnicos = async () => {
   const [rows] = await pool.execute(
     `SELECT 
-       t.idtecnico,
+       t.id_tecnico,
        t.nombre,
-       COALESCE(t.apellido, '') as apellido,
+       t.documento,
        t.especialidad,
        pr.razon_social as proveedor_nombre,
        COUNT(st.id_servicio_tecnico) as servicios_totales,
@@ -112,11 +112,10 @@ const getDesempenoTecnicos = async () => {
        COUNT(ct.id_calificacion_tecnico) as total_calificaciones
      FROM tecnico t
      JOIN proveedor pr ON t.proveedor_id_proveedor = pr.id_proveedor
-     LEFT JOIN servicio_tecnico st ON t.idtecnico = st.tecnico_idtecnico
+     LEFT JOIN servicio_tecnico st ON t.id_tecnico = st.tecnico_idtecnico
      LEFT JOIN incidente i ON st.incidente_idincidente = i.idincidente
-     LEFT JOIN calificacion_tecnico ct ON t.idtecnico = ct.tecnico_id_tecnico
-     WHERE t.estado = 'Activo'
-     GROUP BY t.idtecnico, t.nombre, t.apellido, t.especialidad, pr.razon_social
+     LEFT JOIN calificacion_tecnico ct ON t.id_tecnico = ct.tecnico_id_tecnico
+     GROUP BY t.id_tecnico, t.nombre, t.documento, t.especialidad, pr.razon_social
      ORDER BY calificacion_promedio DESC, servicios_resueltos DESC`
   );
   return rows;
@@ -134,7 +133,7 @@ const getFinancieroPorProveedor = async (proveedorId) => {
        f.importe as importe_total,
        f.estado as estado_factura,
        oc.id_orden_compra,
-       oc.fecha_orden,
+       oc.fecha as fecha_orden,
        COUNT(pp.id_plan_pago) as total_cuotas,
        COUNT(CASE WHEN pp.estado = 'Pagado' THEN 1 END) as cuotas_pagadas,
        COUNT(CASE WHEN pp.estado = 'Pendiente' THEN 1 END) as cuotas_pendientes,
@@ -144,7 +143,7 @@ const getFinancieroPorProveedor = async (proveedorId) => {
      JOIN orden_compra oc ON f.orden_compra_id_orden_compra = oc.id_orden_compra
      LEFT JOIN plan_pago pp ON f.id_factura = pp.factura_id_factura
      WHERE f.proveedor_id_proveedor = ?
-     GROUP BY f.id_factura, f.fecha_emision, f.fecha_vencimiento, f.importe, f.estado, oc.id_orden_compra, oc.fecha_orden
+     GROUP BY f.id_factura, f.fecha_emision, f.fecha_vencimiento, f.importe, f.estado, oc.id_orden_compra, oc.fecha
      ORDER BY f.fecha_emision DESC`,
     [proveedorId]
   );
