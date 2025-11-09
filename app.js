@@ -20,7 +20,19 @@ const reportesRoutes = require('./src/routes/reportes.routes');
 // Inicializar la aplicación
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// Configuración CORS para permitir frontend en Vercel
+app.use(cors({
+  origin: [
+    'http://localhost:5173',           // Desarrollo local
+    'http://localhost:3000',           // Desarrollo local alternativo
+    process.env.FRONTEND_URL,          // URL de Vercel (configurar en Railway)
+    /\.vercel\.app$/                   // Cualquier subdominio de Vercel
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // --- Rutas ---
 app.get('/api', (req, res) => {
